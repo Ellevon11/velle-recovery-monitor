@@ -39,11 +39,16 @@ issue; unchanged incidents do not produce issue-comment spam. Recovery posts a
 comment and closes it. Failed checks also fail the workflow. Enable GitHub
 Actions failure email notifications and notifications for assigned issues in
 your GitHub notification settings; email delivery depends on those settings.
+The first hosted run also creates a clearly labelled **[TEST]** issue, verifies
+that it was assigned to the owner, and closes it. This tests the runner's actual
+alert permissions without inducing an outage or using customer data. The
+verification timestamp is persisted so the test does not repeat each run.
+Email receipt itself is not certified by the API; check notification settings.
 The GitHub Actions run and assigned incident issue remain the independent
 visible report even if the primary app is down.
 
 `state.json` stores only certificate fingerprint/expiry, diagnostic failure
-identifiers, issue number and time. A daily state commit prevents the normal
+identifiers, issue number, alert-verification time and check time. A daily state commit prevents the normal
 60-day repository-inactivity shutdown of public scheduled workflows. Alert or
 state persistence failures fail the workflow rather than falsely reporting
 delivery. No artifacts or external notification services are purchased.
