@@ -74,8 +74,8 @@ test("first hosted run verifies a clearly labelled synthetic assigned alert and 
   const original = f.request;
   f.request = async (url, init) => {
     const response = await original(url, init);
-    if (new URL(url).pathname.endsWith("/issues/42") && init.method === "GET") {
-      return new Response(JSON.stringify({ assignees: [{ login: "Owner" }] }));
+    if (new URL(url).pathname.endsWith("/issues/42")) {
+      return new Response(JSON.stringify(init.method === "GET" ? { assignees: [{ login: "Owner" }] } : {}));
     }
     return response;
   };
