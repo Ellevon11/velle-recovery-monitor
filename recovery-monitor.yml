@@ -1,0 +1,37 @@
+name: Independent recovery gateway monitor
+
+on:
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+# Only this public, monitor-only repository. No AWS or Clerk credentials.
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: independent-recovery-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Read approved public monitor code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check gateway independently
+        id: probe
+        continue-on-error: true
+        run: node monitor.mjs
+      - name: Send or recover GitHub alert and save renewal history
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node notify.mjs
+      - name: Keep workflow failure notifications active
+        if: always() && steps.probe.outcome != 'success'
+        run: exit 1
