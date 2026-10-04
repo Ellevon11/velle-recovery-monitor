@@ -69,3 +69,25 @@ test("state persistence failure and private repo fail explicitly", async () => {
   await assert.rejects(run(f), /approved public/);
   assert.equal(f.calls.length, 1);
 });
+test("first hosted run verifies a clearly labelled synthetic assigned alert and closes it", async () => {
+  const f = fixture();
+  const original = f.request;
+  f.request = async (url, init) => {
+    const response = await original(url, init);
+    if (new URL(url).pathname.endsWith("/issues/42") && init.method === "GET") {
+      return new Response(JSON.stringify({ assignees: [{ login: "Owner" }] }));
+    }
+    return response;
+  };
+  const result = await run(f, { report: { ...report, availability: "ok", checks: [] }, startupDrill: true });
+  assert.equal(result.alertDeliveryVerifiedAt, new Date(now).toISOString());
+  const posted = f.calls.find(c => c.method === "POST" && c.path.endsWith("/issues"));
+  assert.match(posted.body.title, /^\[TEST\]/);
+  assert.match(posted.body.body, /No gateway outage was induced/);
+  assert.ok(f.calls.some(c => c.method === "PATCH" && c.body.state === "closed"));
+});
+test("persisted alert verification does not repeat the synthetic test", async () => {
+  const f = fixture({ previous: { signature: "ok", lastCheckedAt: report.checkedAt, alertDeliveryVerifiedAt: report.checkedAt } });
+  await run(f, { report: { ...report, availability: "ok", checks: [] }, startupDrill: true });
+  assert.equal(f.calls.filter(c => c.method === "POST").length, 0);
+});
