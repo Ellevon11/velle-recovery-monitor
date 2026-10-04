@@ -20,7 +20,7 @@ Do not rotate keys automatically, disable TLS verification, or use customer jour
 `;
 }
 
-export async function notify({ report, config, repo, token, request = fetch, now = Date.now(), runId }) {
+export async function notify({ report, config, repo, token, request = fetch, now = Date.now(), runId, startupDrill = false }) {
   if (!/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repo ?? "") || !token
     || !/^[A-Za-z0-9-]+$/.test(config.alertAssignee ?? "") || !/^\d+$/.test(String(runId))) {
     throw new Error("Alert delivery configuration is incomplete");
@@ -78,14 +78,33 @@ export async function notify({ report, config, repo, token, request = fetch, now
     await api(`${base}/issues/${issueNumber}`, "PATCH", { state: "closed", state_reason: "completed" });
   }
   const certificate = report.certificate ?? previous.certificate;
+  let alertDeliveryVerifiedAt = previous.alertDeliveryVerifiedAt;
+  if (startupDrill && !alertDeliveryVerifiedAt) {
+    const drill = await api(`${base}/issues`, "POST", {
+      title: "[TEST] Velle recovery monitor alert-delivery check",
+      body: `Synthetic alert-delivery check only. **No gateway outage was induced or detected by this test.**\n\nThe independent GitHub runner is checking that it can assign an alert to the owner. No customer account, journal, AWS credential or Clerk token is used.\n\n${runUrl}`,
+      assignees: [config.alertAssignee],
+    });
+    const delivered = await api(`${base}/issues/${drill.number}`);
+    if (!delivered.assignees?.some(a => a.login === config.alertAssignee)) {
+      throw new Error("Synthetic alert assignment could not be verified");
+    }
+    await api(`${base}/issues/${drill.number}/comments`, "POST", {
+      body: "Synthetic alert was successfully created and assigned by the independent runner. Closing the test. This does not certify authenticated recovery or production-auth outage independence.",
+    });
+    await api(`${base}/issues/${drill.number}`, "PATCH", { state: "closed", state_reason: "completed" });
+    alertDeliveryVerifiedAt = new Date(now).toISOString();
+  }
   const state = {
     version: 1, lastCheckedAt: report.checkedAt, signature,
     ...(issueNumber ? { issueNumber } : {}),
     ...(certificate ? { certificate } : {}),
+    ...(alertDeliveryVerifiedAt ? { alertDeliveryVerifiedAt } : {}),
   };
   // A daily public, data-free state commit also prevents GitHub's 60-day
   // repository-inactivity scheduled-workflow shutdown. No extra service.
   if (!file || previous.signature !== signature || previous.issueNumber !== issueNumber
+    || previous.alertDeliveryVerifiedAt !== alertDeliveryVerifiedAt
     || JSON.stringify(previous.certificate) !== JSON.stringify(certificate)
     || now - Date.parse(previous.lastCheckedAt) >= 24 * 3_600_000) {
     await api(`${base}/contents/state.json`, "PUT", {
@@ -95,7 +114,8 @@ export async function notify({ report, config, repo, token, request = fetch, now
       branch: "main",
     });
   }
-  return { delivered: true, incident, ...(issueNumber ? { issueNumber } : {}) };
+  return { delivered: true, incident, ...(issueNumber ? { issueNumber } : {}),
+    ...(alertDeliveryVerifiedAt ? { alertDeliveryVerifiedAt } : {}) };
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -109,7 +129,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     }
     const config = JSON.parse(await readFile(new URL("./config.json", import.meta.url), "utf8"));
     console.log(JSON.stringify(await notify({ report, config, repo: process.env.GITHUB_REPOSITORY,
-      token: process.env.GITHUB_TOKEN, runId: process.env.GITHUB_RUN_ID })));
+      token: process.env.GITHUB_TOKEN, runId: process.env.GITHUB_RUN_ID, startupDrill: true })));
   } catch {
     console.error("GitHub alert delivery failed. Check workflow permissions and GitHub Actions failure notifications.");
     process.exitCode = 1;
