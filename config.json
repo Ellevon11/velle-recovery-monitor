@@ -1,0 +1,13 @@
+{
+  "gatewayOrigin": "https://18.226.155.37",
+  "issuer": "https://code-migrate.replit.app/api/__clerk",
+  "jwksUrl": "https://code-migrate.replit.app/api/__clerk/.well-known/jwks.json",
+  "signingKeys": [
+    {
+      "kid": "ins_3Idlhps6pWWuqcZl2ZGslb0xArO",
+      "thumbprint": "AXUW3ApcqTJ4KEzvj38gkTmSXuYIvsEjCQZyZldxeKo"
+    }
+  ],
+  "certificateWarningHours": 36,
+  "alertAssignee": "Ellevon11"
+}
