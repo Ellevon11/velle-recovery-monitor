@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "lastCheckedAt": "2026-10-21T02:10:01.990Z",
+  "lastCheckedAt": "2026-10-21T10:01:07.976Z",
   "signature": "ok",
   "certificate": {
-    "fingerprint": "B0:94:DC:BF:BD:A8:76:0A:2F:6D:1E:90:6D:A0:37:06:12:7C:65:BE:D5:1D:28:01:B1:3F:7C:FF:B8:27:4C:7F",
-    "expiresAt": "2026-10-24T15:59:52.000Z"
+    "fingerprint": "60:A9:85:A8:B4:E7:16:BE:14:C7:5C:BE:F1:C1:87:D6:45:59:F9:42:3E:3B:3D:7B:08:16:1D:68:39:C1:8C:91",
+    "expiresAt": "2026-10-28T00:29:51.000Z"
   },
   "alertDeliveryVerifiedAt": "2026-10-04T21:27:24.305Z"
 }
