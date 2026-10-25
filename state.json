@@ -1,7 +1,8 @@
 {
   "version": 1,
-  "lastCheckedAt": "2026-10-24T16:52:10.784Z",
-  "signature": "ok",
+  "lastCheckedAt": "2026-10-25T10:33:29.513Z",
+  "signature": "production-signing-key-freshness",
+  "issueNumber": 2,
   "certificate": {
     "fingerprint": "91:87:9F:F5:04:BC:01:6D:DE:A4:48:FE:F3:CE:C6:F3:C5:11:8A:24:C1:22:29:58:FF:94:2C:9C:50:C5:8E:13",
     "expiresAt": "2026-10-31T07:09:51.000Z"
