@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "lastCheckedAt": "2026-11-22T08:54:37.786Z",
+  "lastCheckedAt": "2026-11-23T12:26:37.057Z",
   "signature": "ok",
   "issueNumber": 2,
   "certificate": {
-    "fingerprint": "F6:41:99:D6:C0:8B:A0:D5:A3:FB:33:5E:C2:4D:C4:1A:21:24:B1:E4:9D:20:98:33:0D:29:DF:79:27:B9:4F:DD",
-    "expiresAt": "2026-11-26T14:29:51.000Z"
+    "fingerprint": "7B:ED:93:18:11:5B:E8:5A:E6:F4:86:2F:A6:B1:44:EC:98:4F:87:03:33:BC:86:60:A9:C5:B8:AD:E5:04:4B:46",
+    "expiresAt": "2026-11-29T22:59:51.000Z"
   },
   "alertDeliveryVerifiedAt": "2026-10-04T21:27:24.305Z"
 }
